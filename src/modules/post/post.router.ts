@@ -2,13 +2,15 @@
 
 
 //! first i have to done post.router.ts file
+//! this is make sure that the path is correct
 
 import express from "express";
+import { PostController } from "./post.controller";
 
 const router = express.Router();
 
-router.post("/", (req, res) => {
-  res.send("create a new post");
-});
+router.post(
+       "/", PostController.createPost
+)
 
 export const postRouter = router;
