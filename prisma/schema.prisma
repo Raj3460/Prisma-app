@@ -13,53 +13,128 @@ datasource db {
   provider = "postgresql"
 }
 
-
 // Blog posts
-model Post {
-  id String @id @default(uuid())           // UUID primary key
-  title String @db.VarChar(255)              // Post title
-  content String @db.Text                      // Post content
-  thumbnail String?                             // Optional thumbnail URL
-  isFeatured Boolean @default(false)            // Featured post flag
-  status PostStatus @default(PUBLISHED)        // Post status
-  tags String[]                               // Array of tags
-  views Int @default(0)                      // View count
-  authorId String                          //manage by betterAuth
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  comments Comment[]                      // Relation to comments
 
-  @@index([authorId])                    // for querying posts by author
-  @@map("posts")                         // Table name
+model Post {
+  id         String     @id @default(uuid()) // UUID primary key
+  title      String     @db.VarChar(255) // Post title
+  content    String     @db.Text // Post content
+  thumbnail  String? // Optional thumbnail URL
+  isFeatured Boolean    @default(false) // Featured post flag
+  status     PostStatus @default(PUBLISHED) // Post status
+  tags       String[] // Array of tags
+  views      Int        @default(0) // View count
+  authorId   String //manage by betterAuth
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  comments   Comment[] // Relation to comments
+
+  // for querying posts by author
+  // Table name
+  @@index([authorId])
+  @@map("posts")
 }
 
 // Comments on posts
-model Comment {
-  id String @id @default(uuid())  // UUID primary key
-  content String @db.Text         // Comment content
-  authorId String                 //manage by betterAuth
-  postId String                   // Foreign key to Post
-  post Post @relation(fields: [postId], references: [id])   // Relation to Post
-  parentId String?                // Self-referencing foreign key for nested comments
-  parent Comment? @relation("CommentToReplies", fields : [parentId], references: [id])
-  replies Comment[]  @relation("CommentToReplies") // Relation to replies
-  status CommentStatus @default(APPROVED)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@index([postId])  // for querying comments by post
-  @@index([authorId]) // for querying comments by author
-  @@map("comments") // Table name
+model Comment {
+  id        String        @id @default(uuid()) // UUID primary key
+  content   String        @db.Text // Comment content
+  authorId  String //manage by betterAuth
+  postId    String // Foreign key to Post
+  post      Post          @relation(fields: [postId], references: [id]) // Relation to Post
+  parentId  String? // Self-referencing foreign key for nested comments
+  parent    Comment?      @relation("CommentToReplies", fields: [parentId], references: [id])
+  replies   Comment[]     @relation("CommentToReplies") // Relation to replies
+  status    CommentStatus @default(APPROVED)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // for querying comments by post
+  // for querying comments by author
+  // Table name
+  @@index([postId])
+  @@index([authorId])
+  @@map("comments")
 }
 
 // Enums
+
 enum PostStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
 }
 // Enums
+
 enum CommentStatus {
   APPROVED
   REJECTED
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  role   String? @default("USER")
+  phone  String?
+  status String? @default("ACTIVE")
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }
