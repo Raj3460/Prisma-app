@@ -9,6 +9,7 @@ import { postService } from "./post.service";
 //! create post controller
 const createPost = async (req : Request, res : Response) => {
       try {
+            console.log(req.user);
       const result = await postService.cratePost(req.body);
       res.status(201).json({
             success: true,

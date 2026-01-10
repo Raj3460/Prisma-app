@@ -44,41 +44,38 @@ export const auth = betterAuth({
     autoSignIn: false,
     requireEmailVerification: true,
   },
- // emailVerification অবজেক্ট
-// এখানে ইমেইল ভেরিফিকেশন সংক্রান্ত সব লজিক থাকবে
-emailVerification: {
-  
-  // ইউজারকে ভেরিফিকেশন ইমেইল পাঠানোর ফাংশন
-  sendVerificationEmail: async ({ user, token , url }, request) => {
-
-    // ===============================
-    // 1️⃣ Verification URL তৈরি
-    // ===============================
-    // APP_URL = তোমার backend / frontend এর base URL
-    // token query হিসেবে পাঠানো হচ্ছে
-    const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
-
-    // ===============================
-    // 2️⃣ Nodemailer দিয়ে ইমেইল পাঠানো
-    // ===============================
-    const info = await transporter.sendMail({
-
-      // ইমেইল কোথা থেকে যাচ্ছে
-      from: '"Prisma Blog" <prismabyraj@tmail.com>',
-
-      // যাকে ইমেইল পাঠানো হবে (ডাইনামিক)
-      to: user.email,
-
-      // ইমেইলের সাবজেক্ট
-      subject: "Verify your email - Prisma Blog",
-
-      // Plain text fallback (HTML না দেখালে কাজে আসবে)
-      text: `Verify your email using this link: ${verificationUrl}`,
+  // emailVerification অবজেক্ট
+  // এখানে ইমেইল ভেরিফিকেশন সংক্রান্ত সব লজিক থাকবে
+  emailVerification: {
+    // ইউজারকে ভেরিফিকেশন ইমেইল পাঠানোর ফাংশন
+    sendVerificationEmail: async ({ user, token, url }, request) => {
+      // ===============================
+      // 1️⃣ Verification URL তৈরি
+      // ===============================
+      // APP_URL = তোমার backend / frontend এর base URL
+      // token query হিসেবে পাঠানো হচ্ছে
+      const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
 
       // ===============================
-      // 3️⃣ HTML Email Template
+      // 2️⃣ Nodemailer দিয়ে ইমেইল পাঠানো
       // ===============================
-      html: `
+      const info = await transporter.sendMail({
+        // ইমেইল কোথা থেকে যাচ্ছে
+        from: '"Prisma Blog" <prismabyraj@tmail.com>',
+
+        // যাকে ইমেইল পাঠানো হবে (ডাইনামিক)
+        to: user.email,
+
+        // ইমেইলের সাবজেক্ট
+        subject: "Verify your email - Prisma Blog",
+
+        // Plain text fallback (HTML না দেখালে কাজে আসবে)
+        text: `Verify your email using this link: ${verificationUrl}`,
+
+        // ===============================
+        // 3️⃣ HTML Email Template
+        // ===============================
+        html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -175,16 +172,13 @@ emailVerification: {
 
 </body>
 </html>
-`
-    });
+`,
+      });
 
-    // ===============================
-    // 4️⃣ সফল হলে Console log
-    // ===============================
-    console.log("Verification email sent successfully:", info.messageId);
+      // ===============================
+      // 4️⃣ সফল হলে Console log
+      // ===============================
+      console.log("Verification email sent successfully:", info.messageId);
+    },
   },
-},
-
 });
-
-
